@@ -4,6 +4,7 @@ namespace App\Services\Blog;
 
 use App\Models\BlogCategory;
 use App\Services\BaseService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -13,7 +14,8 @@ class BlogCategoryService extends BaseService
 {
     protected $rules = [
         'name' => 'required|string|max:255',
-        'slug' => 'nullable|string|max:255|unique:blog_categories,slug'
+        'slug' => 'nullable|string|max:255|unique:blog_categories,slug',
+        'description' => 'nullable|string',
     ];
 
     public function __construct(BlogCategory $blogCategory)

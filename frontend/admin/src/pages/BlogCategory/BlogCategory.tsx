@@ -22,10 +22,12 @@ const BlogCategory = () => {
     try {
       setLoading(true);
       const response = await BlogCategoryService.getAll(page);
+      console.log(response.data);
+      
       setCategories(response.data);
       setPagination(response);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Lỗi khi tải danh mục:', error);
       toast.error('Không thể tải danh sách danh mục');
     } finally {
       setLoading(false);
@@ -52,7 +54,7 @@ const BlogCategory = () => {
       toast.success('Xóa danh mục thành công!');
       fetchCategories(pagination.current_page);
     } catch (error) {
-      console.error('Error deleting category:', error);
+      console.error('Lỗi khi xóa danh mục:', error);
       toast.error('Không thể xóa danh mục');
     } finally {
       setLoading(false);
@@ -69,14 +71,14 @@ const BlogCategory = () => {
         <div className="container-fluid">
           <div className="row mb-2">
             <div className="col-sm-6">
-              <h1>Blog Categories</h1>
+              <h1>Danh Mục Blog</h1>
             </div>
             <div className="col-sm-6">
               <ol className="breadcrumb float-sm-right">
                 <li className="breadcrumb-item">
-                  <Link to={'/'}>Home</Link>
+                  <Link to={'/'}>Trang Chủ</Link>
                 </li>
-                <li className="breadcrumb-item active">Blog Categories</li>
+                <li className="breadcrumb-item active">Danh Mục Blog</li>
               </ol>
             </div>
           </div>
@@ -85,14 +87,17 @@ const BlogCategory = () => {
 
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">Blog Categories</h3>
-          <div className="card-tools">
+          <h3 className="card-title">Danh Mục Blog</h3>
+          <div className="card-tools d-flex align-items-center" >
+            <Link to="/add-blog-category" className="btn btn-primary btn-sm mr-2">
+              <i className="fas fa-plus"></i> Tạo Danh Mục
+            </Link>
             <div className="input-group input-group-sm" style={{ width: '150px' }}>
               <input
                 type="text"
                 name="table_search"
                 className="form-control float-right"
-                placeholder="Search"
+                placeholder="Tìm kiếm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -116,10 +121,10 @@ const BlogCategory = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Posts Count</th>
-                <th>Actions</th>
+                <th>Tên</th>
+                <th>Mô tả</th>
+                <th>Số Bài Viết</th>
+                <th>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
@@ -135,7 +140,7 @@ const BlogCategory = () => {
                         to={`/blog-category/edit/${category.id}`}
                         className="btn btn-warning btn-sm mr-2"
                       >
-                        <i className="fas fa-edit"></i> Edit
+                        <i className="fas fa-edit"></i> Sửa
                       </Link>
                       {(!category.posts_count || category.posts_count === 0) && (
                         <button
@@ -143,7 +148,7 @@ const BlogCategory = () => {
                           onClick={() => handleDelete(category.id)}
                           disabled={loading}
                         >
-                          <i className="fas fa-trash"></i> Delete
+                          <i className="fas fa-trash"></i> Xóa
                         </button>
                       )}
                     </td>
@@ -152,7 +157,7 @@ const BlogCategory = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="text-center">
-                    No categories found
+                    Không tìm thấy danh mục nào
                   </td>
                 </tr>
               )}

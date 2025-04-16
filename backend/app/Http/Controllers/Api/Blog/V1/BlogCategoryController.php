@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Blog\BlogCategoryStoreRequest;
 use App\Http\Requests\Blog\BlogCategoryUpdateRequest;
 use App\Services\Blog\BlogCategoryService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Exception;
 

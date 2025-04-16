@@ -66,6 +66,22 @@ export const MENU: IMenuItem[] = [
       },
     ],
   },
+  {
+    name: "Bài viết",
+    icon: "fas fa-newspaper nav-icon",
+    children: [
+      {
+        name: "Tất cả bài viết",
+        icon: "fas fa-newspaper nav-icon",
+        path: "/blog",
+      },
+      {
+        name: "Danh mục bài viết",
+        icon: "fas fa-th-list nav-icon",
+        path: "/blog-category",
+      },
+    ],
+  }
 ];
 
 const StyledBrandImage = styled(Image)`

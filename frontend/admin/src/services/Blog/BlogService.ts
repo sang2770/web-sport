@@ -1,6 +1,7 @@
 import { API_CONFIG } from '@app/api/config';
 import axios from 'axios';
 import { PaginatedResponse } from '../BaseApi';
+import { get } from 'http';
 
 export interface BlogPost {
   id: number;
@@ -42,6 +43,15 @@ const BlogService = {
 
   delete: async (id: number): Promise<void> => {
     await axios.delete(`${API_CONFIG.BASE_URL}/api/v1/blogs/${id}`);
+  },
+
+  getById: async (id: number): Promise<BlogPost> => {
+    const response = await axios.get(`${API_CONFIG.BASE_URL}/api/v1/blogs/${id}`);
+    return response.data;
+  },
+  getBySlug: async (slug: string): Promise<BlogPost> => {
+    const response = await axios.get(`${API_CONFIG.BASE_URL}/api/v1/blogs/slug/${slug}`);
+    return response.data;
   },
 };
 

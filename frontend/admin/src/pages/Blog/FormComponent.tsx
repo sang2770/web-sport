@@ -44,7 +44,7 @@ const FormComponent = ({ post, onSave, onCancel }: FormComponentProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
       toast.error('Title is required');
       return;
@@ -74,7 +74,7 @@ const FormComponent = ({ post, onSave, onCancel }: FormComponentProps) => {
       } else {
         await BlogService.create(formDataToSubmit);
       }
-      
+
       toast.success(`Post ${post ? 'updated' : 'created'} successfully!`);
       onSave();
     } catch (error) {
@@ -91,103 +91,119 @@ const FormComponent = ({ post, onSave, onCancel }: FormComponentProps) => {
         <h3 className="card-title">{post ? 'Edit' : 'Create'} Blog Post</h3>
       </div>
       <form onSubmit={handleSubmit}>
-        <div className="card-body">
-          <div className="form-group">
-            <label htmlFor="title">Title</label>
-            <input
-              type="text"
-              className="form-control"
-              id="title"
-              placeholder="Enter post title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="thumbnail">Thumbnail Image</label>
-            <div className="input-group">
-              <div className="custom-file">
-                <input
-                  type="file"
-                  className="custom-file-input"
-                  id="thumbnail"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData({ ...formData, thumbnail: reader.result as string });
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                />
-                <label htmlFor="thumbnail">
-                  <img
-                    src={formData.thumbnail?.toString() || 'URL_ADDRESS.placeholder.com/150'}
-                    alt="Thumbnail preview"
-                    className="file-thumbnail"
-                  />
-                </label>
-              </div>
-            </div>
-            {formData.thumbnail && (
-              <img 
-                src={formData.thumbnail.toString()} 
-                alt="Thumbnail preview" 
-                className="mt-2"
-                style={{ maxWidth: '200px' }}
+        <div className="card-body row">
+          <div className="col col-lg-8 col-md-12">
+            <div className="form-group">
+              <label htmlFor="title">Title</label>
+              <input
+                type="text"
+                className="form-control"
+                id="title"
+                placeholder="Enter post title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                required
               />
-            )}
+            </div>
+            <div className="form-group">
+              <label htmlFor="content">Content</label>
+              <ReactQuill
+                theme="snow"
+                value={formData.content}
+                onChange={(content) => setFormData({ ...formData, content })}
+                modules={{
+                  toolbar: [
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                  ]
+                }}
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="category">Category</label>
-            <select
-              className="form-control"
-              id="category"
-              value={formData.category_id}
-              onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) })}
-              required
-            >
-              <option value="">Select a category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="col col-lg-4 col-md-12">
 
-          <div className="form-group">
-            <label htmlFor="publish_date">Publish Date</label>
-            <input
-              type="datetime-local"
-              className="form-control"
-              id="publish_date"
-              value={formData.pushlish_date}
-              onChange={(e) => setFormData({ ...formData, pushlish_date: e.target.value })}
-            />
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="content">Content</label>
-            <ReactQuill
-              theme="snow"
-              value={formData.content}
-              onChange={(content) => setFormData({ ...formData, content })}
-              modules={{
-                toolbar: [
-                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                  ['link', 'image'],
-                  ['clean']
-                ]
-              }}
-            />
+            <div className="form-group">
+              <label htmlFor="thumbnail">Thumbnail Image</label>
+              <div className="input-group">
+                <div className="custom-file">
+                  <input
+                    type="file"
+                    className="custom-file-input"
+                    id="thumbnail"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({ ...formData, thumbnail: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <label htmlFor="thumbnail">
+                    <img
+                      src={formData.thumbnail?.toString() || 'URL_ADDRESS.placeholder.com/150'}
+                      alt="Thumbnail preview"
+                      className="file-thumbnail"
+                    />
+                  </label>
+                </div>
+              </div>
+              {formData.thumbnail && (
+                <img
+                  src={formData.thumbnail.toString()}
+                  alt="Thumbnail preview"
+                  className="mt-2"
+                  style={{ maxWidth: '200px' }}
+                />
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="category">Category</label>
+              <select
+                className="form-control"
+                id="category"
+                value={formData.category_id}
+                onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) })}
+                required
+              >
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="publish_date">Publish Date</label>
+              <input
+                type="datetime-local"
+                className="form-control"
+                id="publish_date"
+                value={formData.publish_date}
+                onChange={(e) => setFormData({ ...formData, publish_date: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="is_featured">IsFeatured</label>
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="is_featured"
+                checked={formData.is_featured}
+                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+              />
+            </div>
           </div>
         </div>
 

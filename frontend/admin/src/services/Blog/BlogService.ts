@@ -9,10 +9,11 @@ export interface BlogPost {
   category_id: number;
   category_name: string;
   status: 'published' | 'draft';
+  is_featured: boolean;
   thumbnail?: string;
   created_at: string;
   updated_at: string;
-  pushlish_date: string;
+  publish_date: string;
 }
 
 const BlogService = {

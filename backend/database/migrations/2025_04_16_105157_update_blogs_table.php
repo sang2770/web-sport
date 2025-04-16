@@ -11,7 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::table('blogs', function (Blueprint $table) {
+            $table->date('publish_date')->nullable();
+            $table->boolean('is_featured')->default(false);
+        });
     }
 
     /**
@@ -19,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('blogs', function (Blueprint $table) {
+            $table->dropColumn('publish_date');
+            $table->dropColumn('is_featured');
+        });
     }
 };

@@ -9,7 +9,7 @@ class Blog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'slug', 'content', 'category_id', 'thumbnail', "published_date"];
+    protected $fillable = ['title', 'slug', 'content', 'category_id', 'thumbnail', "publish_date", "is_featured"];
     protected $appends = ['status'];
     public function category()
     {
@@ -18,7 +18,7 @@ class Blog extends Model
 
     public function getStatusAttribute()
     {
-        if($this->published_date > now()){
+        if($this->publish_date > now()){
             return "draft";
         }
         return "published";

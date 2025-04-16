@@ -112,6 +112,7 @@ const Blog = () => {
                 <th>Title</th>
                 <th>Category</th>
                 <th>Status</th>
+                <th>Is Featured</th>
                 <th>Created At</th>
                 <th>Actions</th>
               </tr>
@@ -133,6 +134,11 @@ const Blog = () => {
                     <td>
                       <span className={`badge badge-${post.status === 'published' ? 'success' : 'warning'}`}>
                         {post.status}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge badge-${post.is_featured? 'success' : 'danger'}`}>
+                        {post.is_featured? 'Yes' : 'No'}
                       </span>
                     </td>
                     <td>{new Date(post.created_at).toLocaleDateString()}</td>

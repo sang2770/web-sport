@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\CategoryController;
 |
 */
 require __DIR__.'/api_v1.php';
+require __DIR__.'/admin-api.php';
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

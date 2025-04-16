@@ -8,5 +8,5 @@ export const API_ENDPOINTS = {
         GET_PROFILE: "v1/admin/profile",
         UPDATE_PROFILE: "v1/admin/update-profile",
         LOGOUT: "/v1/admin/logout",
-    },
+    }
 };

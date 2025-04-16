@@ -137,7 +137,7 @@ const BlogCategory = () => {
                     <td>{category.posts_count || 0}</td>
                     <td>
                       <Link
-                        to={`/blog-category/edit/${category.id}`}
+                        to={`/edit-blog-category/${category.id}`}
                         className="btn btn-warning btn-sm mr-2"
                       >
                         <i className="fas fa-edit"></i> Sửa

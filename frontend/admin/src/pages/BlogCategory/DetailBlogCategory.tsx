@@ -21,10 +21,10 @@ const DetailBlogCategory = () => {
     : 'create';
 
   useEffect(() => {
-    const fetchCategory = async () => {
+    const fetchCategory = async () => {      
       if (id && action !== 'create') {
         try {
-          const response = await BlogCategoryService.getById(Number(id));
+          const response = await BlogCategoryService.getById(Number(id));          
           setFormData({
             name: response.name || '',
             description: response.description || ''

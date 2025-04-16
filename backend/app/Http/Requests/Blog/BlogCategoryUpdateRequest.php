@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Requests\Blog;
-
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator as ValidationValidator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -26,9 +26,22 @@ class BlogCategoryUpdateRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->route('id'); //lấy đúng ID danh mục từ route.
-        return [
-            'name' => 'required|string|max:255|unique:blog_categories,name,' . $id
+        $rules = [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            "description" => "nullable|string|max:255"
         ];
+    
+        // Nếu 'name' thay đổi, kiểm tra 'unique'
+        $category = $this->route('category'); // hoặc bạn có thể dùng model để kiểm tra
+        if ($category && $category->name !== $this->input('name')) {
+            $rules['name'][] = Rule::unique('blog_categories')->ignore($id);
+        }
+
+        return $rules;
     }
 
     /**

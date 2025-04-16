@@ -32,7 +32,7 @@ const BlogCategoryService = {
 
   getById: async (id: number): Promise<BlogCategories> => {
     const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blog-categories/${id}`);
-    return response.data;
+    return response.data?.data;
   }
 };
 

@@ -7,38 +7,55 @@ const Blog = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState([]);
+    const [featuredPosts, setFeaturedPosts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [pagination, setPagination] = useState({
         current_page: 1,
         last_page: 1,
         total: 0
     });
-    const [featuredPost, setFeaturedPost] = useState(null);
 
     useEffect(() => {
         fetchPosts();
         fetchCategories();
     }, [currentPage]);
 
+    const fetchFeaturedPosts = async () => {
+        try {
+            setLoading(true);
+            const response = await BlogService.getAll(1, { is_featured: true });
+            setFeaturedPosts(response.data);
+            if (response.data.length > 0) {
+                setFeaturedPost(response.data[0]);
+            }
+        } catch (error) {
+            console.error('Error fetching featured posts:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const fetchPosts = async () => {
         try {
             setLoading(true);
-            const response = await BlogService.getAll(currentPage);
+            const response = await BlogService.getAll(currentPage, { is_featured: false });
             setPosts(response.data);
             setPagination({
                 current_page: response.current_page,
                 last_page: response.last_page,
                 total: response.total
             });
-            if (currentPage === 1 && response.data.length > 0) {
-                setFeaturedPost(response.data[0]);
-            }
         } catch (error) {
             console.error('Error fetching posts:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchFeaturedPosts();
+        fetchPosts();
+    }, [currentPage]);
 
     const fetchCategories = async () => {
         try {
@@ -73,14 +90,18 @@ const Blog = () => {
     return (
         <div className="bg-gray-100 text-gray-900 min-h-screen p-4">
             {/* Bài viết nổi bật */}
-            {featuredPost && (
-                <section className="max-w-6xl mx-auto mb-6 bg-white shadow-md rounded-lg overflow-hidden">
-                    <img src={featuredPost.thumbnail} alt={featuredPost.title} className="w-full h-64 object-cover" />
-                    <div className="p-6">
-                        <h2 className="text-2xl font-bold">{featuredPost.title}</h2>
-                        <p className="text-gray-700 mt-2">{featuredPost.description}</p>
-                    </div>
-                </section>
+            {featuredPosts && featuredPosts.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto mb-6">
+                    {featuredPosts.map((post, index) => (
+                        <section key={index} className="bg-white shadow-md rounded-lg overflow-hidden">
+                            <img src={post.thumbnail} alt={post.title} className="w-full h-64 object-cover" />
+                            <div className="p-6">
+                                <h2 className="text-2xl font-bold">{post.title}</h2>
+                                <p className="text-gray-700 mt-2">{post.description}</p>
+                            </div>
+                        </section>
+                    ))}
+                </div>
             )}
 
             <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">

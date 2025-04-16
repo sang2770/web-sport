@@ -20,10 +20,10 @@ class BlogController extends Controller
     }
 
     // Lấy danh sách tất cả bài viết blog
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $blogs = $this->blogService->getBlogs();
+            $blogs = $this->blogService->getBlogs($request);
             return response()->json([
                 'status' => 200,
                 'data' => $blogs

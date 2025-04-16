@@ -23,12 +23,68 @@ class BlogService extends BaseService
         parent::__construct($blog);
     }
 
-    public function getBlogs($paginate = 10)
+    public function getBlogs($request)
     {
         try {
-            return $this->getAll($paginate);
+            // Validate pagination parameters
+            $perPage = $request->input('per_page', 10);
+            if ($perPage <= 0 || $perPage > 100) {
+                throw new Exception('Invalid pagination parameters. Per page must be between 1 and 100.');
+            }
+
+            $query = Blog::query();
+
+            // Search by keyword (in title or content) with index optimization
+            if ($request->filled('keyword')) {
+                $keyword = trim($request->input('keyword'));
+                if (strlen($keyword) >= 3) {
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('title', 'like', "%$keyword%")
+                          ->orWhere('content', 'like', "%$keyword%");
+                    });
+                }
+            }
+
+            // Filter by category with eager loading optimization
+            if ($request->filled('category_id')) {
+                $categoryId = $request->input('category_id');
+                $query->where('category_id', $categoryId);
+            }
+
+            // Filter by featured status
+            if ($request->filled('is_featured')) {
+                $query->where('is_featured', $request->boolean('is_featured'));
+            }
+
+            // Date range filter
+            if ($request->filled('start_date')) {
+                $query->where('publish_date', '>=', $request->input('start_date'));
+            }
+            if ($request->filled('end_date')) {
+                $query->where('publish_date', '<=', $request->input('end_date'));
+            }
+
+            // Apply sorting
+            $sortBy = $request->input('sort_by', 'publish_date');
+            $sortOrder = $request->input('sort_order', 'desc');
+            $allowedSortFields = ['publish_date', 'title', 'created_at'];
+            
+            if (in_array($sortBy, $allowedSortFields)) {
+                $query->orderBy($sortBy, strtolower($sortOrder) === 'asc' ? 'asc' : 'desc');
+            } else {
+                $query->orderByDesc('publish_date');
+            }
+
+            // Eager load relationships
+            $query->with(['category']);
+
+            // Return paginated or all results
+            return $request->boolean('paginate', true)
+                ? $query->paginate($perPage)
+                : $query->get();
+
         } catch (Exception $e) {
-            throw new Exception('Lỗi khi lấy danh sách blog: ' . $e->getMessage());
+            throw new Exception('Error retrieving blog list: ' . $e->getMessage());
         }
     }
 

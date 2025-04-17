@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Blog\BlogStoreRequest;
 use App\Http\Requests\Blog\BlogUpdateRequest;
 use App\Services\Blog\BlogService;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class BlogController extends Controller
@@ -20,114 +22,99 @@ class BlogController extends Controller
     }
 
     // Lấy danh sách tất cả bài viết blog
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
+        Log::info('Request index data: '. json_encode($request->all()));
         try {
             $blogs = $this->blogService->getBlogs($request);
             return response()->json([
-                'status' => 200,
+                'success' => true,
                 'data' => $blogs
-            ], 200);
+            ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Lỗi khi lấy bài viết blog.',
-                'message' => $e->getMessage(),
+                'success' => false,
+                'message' => 'Lỗi khi lấy bài viết blog: ' . $e->getMessage()
             ], 500);
         }
     }
 
     // Tạo mới bài viết blog
-    public function store(BlogStoreRequest $request)
+    public function store(BlogStoreRequest $request): JsonResponse
     {
+        Log::info('Request store data: '. json_encode($request->all()));
         try {
-            // $data['user_id'] = auth()->id(); // Gán user_id từ user đang đăng nhập
             $data = $request->validated();
-            $data['slug'] = Str::slug($data['title']); // Tạo slug tự động
-            if ($request->hasFile('thumbnail')) {
-                $file = $request->file('thumbnail');
-                $path = $file->store('thumbnails', 'public');
-                $data['thumbnail'] = $path;
-            }
-            $blog = $this->blogService->create($data);
+            $blog = $this->blogService->createBlog($data);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Bài viết blog đã được tạo thành công!',
                 'data' => $blog
             ], 201);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Lỗi khi tạo bài viết blog.',
-                'message' => $e->getMessage(),
+                'success' => false,
+                'message' => 'Lỗi khi tạo bài viết blog: ' . $e->getMessage()
             ], 500);
         }
     }
 
     // Cập nhật bài viết blog
-    public function update(BlogUpdateRequest $request, $id)
+    public function update(BlogUpdateRequest $request, $id): JsonResponse
     {
         try {
-            // Kiểm tra bài viết có tồn tại không
-            $blog = $this->blogService->findBlog($id);
-            if (!$blog) {
-                return response()->json([
-                    'error' => 'Bài viết blog không tồn tại!',
-                ], 404);
-            }
+            Log::error('Request data: '. json_encode($request->all()));
             $data = $request->validated();
-            // Nếu title thay đổi thì cập nhật slug
-            if (isset($data['title']) && $data['title'] !== $blog->title) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-            if ($request->hasFile('thumbnail')) {
-                $file = $request->file('thumbnail');
-                $path = $file->store('thumbnails', 'public');
-                $data['thumbnail'] = $path;
-            }
-
-            $blog = $this->blogService->update($id, $data);
+            $blog = $this->blogService->updateBlog($id, $data);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Bài viết blog đã được cập nhật thành công!',
                 'data' => $blog
-            ], 200);
+            ]);
         } catch (Exception $e) {
+            $statusCode = str_contains($e->getMessage(), 'không tồn tại') ? 404 : 500;
             return response()->json([
-                'error' => 'Lỗi khi cập nhật bài viết blog.',
-                'message' => $e->getMessage(),
-            ], 500);
+                'success' => false,
+                'message' => 'Lỗi khi cập nhật bài viết blog: ' . $e->getMessage()
+            ], $statusCode);
         }
     }
 
     // Xóa bài viết blog
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         try {
-            $this->blogService->delete($id);
+            $this->blogService->deleteBlog($id);
             return response()->json([
+                'success' => true,
                 'message' => 'Bài viết blog đã được xóa thành công!'
-            ], 200);
+            ]);
         } catch (Exception $e) {
+            $statusCode = str_contains($e->getMessage(), 'không tồn tại') ? 404 : 500;
             return response()->json([
-                'error' => 'Lỗi khi xóa bài viết blog.',
-                'message' => $e->getMessage(),
-            ], 500);
+                'success' => false,
+                'message' => 'Lỗi khi xóa bài viết blog: ' . $e->getMessage()
+            ], $statusCode);
         }
     }
 
     // Lấy thông tin chi tiết bài viết blog
-    public function show($id)
+    public function show($id): JsonResponse
     {
         try {
             $blog = $this->blogService->findBlog($id);
             return response()->json([
-                'status' => 200,
+                'success' => true,
                 'data' => $blog
-            ], 200);
+            ]);
         } catch (Exception $e) {
+            $statusCode = str_contains($e->getMessage(), 'không tồn tại') ? 404 : 500;
             return response()->json([
-                'error' => 'Lỗi khi lấy thông tin bài viết blog.',
-                'message' => $e->getMessage(),
-            ], 500);
+                'success' => false,
+                'message' => 'Lỗi khi lấy thông tin bài viết blog: ' . $e->getMessage()
+            ], $statusCode);
         }
     }
 }

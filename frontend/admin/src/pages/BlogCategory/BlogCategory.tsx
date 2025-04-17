@@ -92,7 +92,7 @@ const BlogCategory = () => {
             <Link to="/add-blog-category" className="btn btn-primary btn-sm mr-2">
               <i className="fas fa-plus"></i> Tạo Danh Mục
             </Link>
-            <div className="input-group input-group-sm" style={{ width: '150px' }}>
+            {/* <div className="input-group input-group-sm" style={{ width: '150px' }}>
               <input
                 type="text"
                 name="table_search"
@@ -106,7 +106,7 @@ const BlogCategory = () => {
                   <i className="fas fa-search"></i>
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 

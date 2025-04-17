@@ -12,10 +12,6 @@ use Illuminate\Support\Facades\Validator;
 class BlogService extends BaseService
 {
     protected $rules = [
-        'title' => 'required|string|max:255',
-        'content' => 'required|string',
-        'category_id' => 'required|exists:blog_categories,id',
-        'thumbnail' => 'nullable|string|max:255'
     ];
 
     public function __construct(Blog $blog)
@@ -102,6 +98,11 @@ class BlogService extends BaseService
                 $data['slug'] = Str::slug($data['title']);
             }
 
+            // Check slug đã tồn tại
+            if ($this->model->where('slug', $data['slug'])->exists()) {
+                throw new Exception('Slug đã tồn tại');
+            }
+
             return $this->create($data);
         } catch (ValidationException $e) {
             throw new Exception('Lỗi validation: ' . implode(', ', $e->validator->errors()->all()));
@@ -120,8 +121,7 @@ class BlogService extends BaseService
             }
 
             // Validate dữ liệu cập nhật
-            $updateRules = array_intersect_key($this->rules, $data);
-            $validator = Validator::make($data, $updateRules);
+            $validator = Validator::make($data, $this->rules);
             
             if ($validator->fails()) {
                 throw new ValidationException($validator);
@@ -130,6 +130,13 @@ class BlogService extends BaseService
             // Cập nhật slug nếu title thay đổi
             if (isset($data['title']) && !isset($data['slug'])) {
                 $data['slug'] = Str::slug($data['title']);
+            }
+            
+            // Check slug đã tồn tại (trừ trường hợp slug của blog đang cập nhật)
+            if (isset($data['slug']) && $data['slug'] !== $blog->slug) {
+                if ($this->model->where('slug', $data['slug'])->exists()) {
+                    throw new Exception('Slug đã tồn tại');
+                }
             }
 
             return $this->update($id, $data);

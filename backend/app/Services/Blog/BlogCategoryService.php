@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 class BlogCategoryService extends BaseService
 {
     protected $rules = [
-        'name' => 'required|string|max:255',
+        'name' => 'required|string|max:255|unique:blog_categories,name',
         'slug' => 'nullable|string|max:255|unique:blog_categories,slug',
-        'description' => 'nullable|string',
+        'description' => 'nullable|string|max:255'
     ];
 
     public function __construct(BlogCategory $blogCategory)

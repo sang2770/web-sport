@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import BlogService, { BlogPost } from '@app/services/Blog/BlogService';
 
-
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [pagination, setPagination] = useState<any>({
@@ -21,11 +20,11 @@ const Blog = () => {
   const fetchPosts = async (page: number = 1) => {
     try {
       setLoading(true);
-      const response = await BlogService.getAll(page);
+      const response = await BlogService.getAll({page, keyword: searchTerm});
       setPosts(response.data);
       setPagination(response);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('Lỗi khi tải bài viết:', error);
       toast.error('Không thể tải danh sách bài viết');
     } finally {
       setLoading(false);
@@ -41,7 +40,7 @@ const Blog = () => {
       toast.success('Xóa bài viết thành công!');
       fetchPosts(pagination.current_page);
     } catch (error) {
-      console.error('Error deleting post:', error);
+      console.error('Lỗi khi xóa bài viết:', error);
       toast.error('Không thể xóa bài viết');
     } finally {
       setLoading(false);
@@ -58,14 +57,14 @@ const Blog = () => {
         <div className="container-fluid">
           <div className="row mb-2">
             <div className="col-sm-6">
-              <h1>Blog Posts</h1>
+              <h1>Bài Viết Blog</h1>
             </div>
             <div className="col-sm-6">
               <ol className="breadcrumb float-sm-right">
                 <li className="breadcrumb-item">
-                  <Link to={'/'}>Home</Link>
+                  <Link to={'/'}>Trang Chủ</Link>
                 </li>
-                <li className="breadcrumb-item active">Blog Posts</li>
+                <li className="breadcrumb-item active">Bài Viết Blog</li>
               </ol>
             </div>
           </div>
@@ -74,28 +73,28 @@ const Blog = () => {
 
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">Blog Posts</h3>
-          <div className="card-tools">
-            <Link to="/blog/create" className="btn btn-primary btn-sm mr-2">
-              <i className="fas fa-plus"></i> Create Post
+          <h3 className="card-title">Bài Viết Blog</h3>
+          <div className="card-tools d-flex align-items-center">
+            <Link to="/add-blog" className="btn btn-primary btn-sm mr-2">
+              <i className="fas fa-plus"></i> Tạo Bài Viết
             </Link>
             <div className="input-group input-group-sm" style={{ width: '150px' }}>
               <input
                 type="text"
                 name="table_search"
                 className="form-control float-right"
-                placeholder="Search"
+                placeholder="Tìm kiếm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <div className="input-group-append">
-                <button type="submit" className="btn btn-default">
+                <button type="submit" className="btn btn-default" onClick={() => fetchPosts()}>
                   <i className="fas fa-search"></i>
                 </button>
               </div>
             </div>
           </div>
-        </div>
+      </div>
 
         <div className="card-body table-responsive p-0">
           {loading && (
@@ -108,13 +107,13 @@ const Blog = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Thumbnail</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Is Featured</th>
-                <th>Created At</th>
-                <th>Actions</th>
+                <th>Ảnh Thu Nhỏ</th>
+                <th>Tiêu Đề</th>
+                <th>Danh Mục</th>
+                <th>Trạng Thái</th>
+                <th>Nổi Bật</th>
+                <th>Ngày Tạo</th>
+                <th>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
@@ -130,31 +129,31 @@ const Blog = () => {
                       />
                     </td>
                     <td>{post.title}</td>
-                    <td>{post.category_name}</td>
+                    <td>{post.category?.name}</td>
                     <td>
                       <span className={`badge badge-${post.status === 'published' ? 'success' : 'warning'}`}>
-                        {post.status}
+                        {post.status === 'published' ? 'Đã Xuất Bản' : 'Bản Nháp'}
                       </span>
                     </td>
                     <td>
                       <span className={`badge badge-${post.is_featured? 'success' : 'danger'}`}>
-                        {post.is_featured? 'Yes' : 'No'}
+                        {post.is_featured? 'Có' : 'Không'}
                       </span>
                     </td>
                     <td>{new Date(post.created_at).toLocaleDateString()}</td>
                     <td>
                       <Link
-                        to={`/blog/edit/${post.id}`}
+                        to={`/edit-blog/${post.id}`}
                         className="btn btn-warning btn-sm mr-2"
                       >
-                        <i className="fas fa-edit"></i> Edit
+                        <i className="fas fa-edit"></i> Sửa
                       </Link>
                       <button
                         className="btn btn-danger btn-sm"
                         onClick={() => handleDelete(post.id)}
                         disabled={loading}
                       >
-                        <i className="fas fa-trash"></i> Delete
+                        <i className="fas fa-trash"></i> Xóa
                       </button>
                     </td>
                   </tr>
@@ -162,7 +161,7 @@ const Blog = () => {
               ) : (
                 <tr>
                   <td colSpan={6} className="text-center">
-                    No posts found
+                    Không tìm thấy bài viết nào
                   </td>
                 </tr>
               )}

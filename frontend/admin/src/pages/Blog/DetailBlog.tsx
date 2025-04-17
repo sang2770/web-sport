@@ -20,85 +20,85 @@ const DetailBlog = () => {
   const [categories, setCategories] = useState<BlogCategories[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Fetch categories on component mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await BlogCategoryService.getAll();
         setCategories(response.data);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        toast.error('Failed to load categories');
+        console.error('Lỗi khi tải danh mục:', error);
+        toast.error('Không thể tải danh mục');
       }
     };
 
     fetchCategories();
   }, []);
 
+  // Fetch blog post data when id is available and not in create mode
   useEffect(() => {
-    const fetchPost = async () => {
-      if (id) {
-        try {
-          const response = await BlogService.getById(Number(id));
-          setFormData(response);
-        } catch (error) {
-          toast.error('Failed to fetch post');
-          navigate('/admin/blogs');
-        }
-      } else {
+    const fetchBlogData = async () => {
+      if (!id || action === 'create') {
         setFormData({} as BlogPost);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const blogData = await BlogService.getById(Number(id));
+        setFormData(blogData);
+      } catch (error) {
+        console.error('Lỗi khi tải bài viết:', error);
+        toast.error('Không thể tải bài viết');
+        navigate('/admin/blogs');
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (action !== 'create') {
-      fetchPost();
-    }
+    fetchBlogData();
   }, [id, action]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const requiredFields = {
+      title: 'Vui lòng nhập tiêu đề',
+      content: 'Vui lòng nhập nội dung',
+      category_id: 'Vui lòng chọn danh mục'
+    };
 
-    if (action === 'view') {
-      navigate(`/admin/blogs/edit/${id}`);
-      return;
-    }
-
-    if (!formData.title?.trim()) {
-      toast.error('Title is required');
-      return;
-    }
-
-    if (!formData.content?.trim()) {
-      toast.error('Content is required');
-      return;
-    }
-
-    if (!formData.category_id) {
-      toast.error('Please select a category');
-      return;
+    for (const [field, message] of Object.entries(requiredFields)) {
+      if (!formData[field as keyof BlogPost]?.toString().trim()) {
+        toast.error(message);
+        return;
+      }
     }
 
     try {
       setLoading(true);
-      const formDataToSubmit = new FormData();
-      formDataToSubmit.append('title', formData.title);
-      formDataToSubmit.append('content', formData.content);
-      formDataToSubmit.append('category_id', formData.category_id.toString());
-      formDataToSubmit.append('status', formData.status);
-      formDataToSubmit.append('thumbnail', formData.thumbnail?.toString() || '');
-      formDataToSubmit.append('publish_date', formData.publish_date || '');
-      formDataToSubmit.append('is_featured', formData.is_featured ? '1' : '0');
+      
+      const formDataToSubmit = {
+        title: formData.title,
+        content: formData.content,
+        category_id: formData.category_id?.toString() ?? "1",
+        status: formData.status,
+        thumbnail: formData.thumbnail?.toString() || '',
+        publish_date: formData.publish_date || '',
+        is_featured: formData.is_featured ? '1' : '0'
+      };
 
       if (action === 'update') {
         await BlogService.update(Number(id), formDataToSubmit);
-        toast.success('Post updated successfully!');
+        toast.success('Cập nhật bài viết thành công!');
       } else {
         await BlogService.create(formDataToSubmit);
-        toast.success('Post created successfully!');
+        toast.success('Tạo bài viết thành công!');
       }
-      navigate('/admin/blogs');
+      navigate('/blog');
     } catch (error) {
-      console.error('Error saving post:', error);
-      toast.error(`Failed to ${action} post`);
+      console.error('Lỗi khi lưu bài viết:', error);
+      toast.error(`Không thể ${action === 'update' ? 'cập nhật' : 'tạo'} bài viết`);
     } finally {
       setLoading(false);
     }
@@ -108,7 +108,7 @@ const DetailBlog = () => {
     <div className="card">
       <div className="card-header">
         <h3 className="card-title">
-          {action === 'view' ? 'View' : action === 'update' ? 'Edit' : 'Create'} Blog Post
+          {action === 'view' ? 'Xem' : action === 'update' ? 'Chỉnh sửa' : 'Tạo'} Bài Viết
         </h3>
       </div>
       <form onSubmit={handleSubmit}>
@@ -116,12 +116,12 @@ const DetailBlog = () => {
           {/* Left Side */}
           <div className="col col-lg-8 col-md-12">
             <div className="form-group">
-              <label htmlFor="title">Title</label>
+              <label htmlFor="title">Tiêu đề</label>
               <input
                 type="text"
                 className="form-control"
                 id="title"
-                placeholder="Enter post title"
+                placeholder="Nhập tiêu đề bài viết"
                 value={formData.title || ''}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 readOnly={action === 'view'}
@@ -129,7 +129,7 @@ const DetailBlog = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="content">Content</label>
+              <label htmlFor="content">Nội dung</label>
               <ReactQuill
                 theme="snow"
                 value={formData.content || ''}
@@ -151,7 +151,7 @@ const DetailBlog = () => {
           {/* Right Side */}
           <div className="col col-lg-4 col-md-12">
             <div className="form-group">
-              <label htmlFor="thumbnail">Thumbnail</label>
+              <label htmlFor="thumbnail">Ảnh đại diện</label>
               {action !== 'view' && (
                 <input
                   type="file"
@@ -171,7 +171,7 @@ const DetailBlog = () => {
               {formData.thumbnail && (
                 <img
                   src={formData.thumbnail.toString()}
-                  alt="Thumbnail"
+                  alt="Ảnh thu nhỏ"
                   className="mt-2"
                   style={{ maxWidth: '100%' }}
                 />
@@ -179,14 +179,14 @@ const DetailBlog = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="category">Category</label>
+              <label htmlFor="category">Danh mục</label>
               <select
                 className="form-control"
                 value={formData.category_id || ''}
                 onChange={(e) => setFormData({ ...formData, category_id: Number(e.target.value) })}
                 disabled={action === 'view'}
               >
-                <option value="">Select a category</option>
+                <option value="">Chọn danh mục</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>{category.name}</option>
                 ))}
@@ -194,9 +194,9 @@ const DetailBlog = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="publish_date">Publish Date</label>
+              <label htmlFor="publish_date">Ngày xuất bản</label>
               <input
-                type="datetime-local"
+                type="date"
                 className="form-control"
                 value={formData.publish_date || ''}
                 onChange={(e) => setFormData({ ...formData, publish_date: e.target.value })}
@@ -204,8 +204,7 @@ const DetailBlog = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="is_featured">Is Featured</label>
+            <div className="form-group ml-3">
               <input
                 type="checkbox"
                 className="form-check-input"
@@ -213,27 +212,28 @@ const DetailBlog = () => {
                 onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
                 disabled={action === 'view'}
               />
+              <label htmlFor="is_featured">Bài viết nổi bật</label>
             </div>
           </div>
         </div>
 
         <div className="card-footer">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? (
-              <><i className="fas fa-spinner fa-spin"></i> Saving...</>
-            ) : action === 'view' ? (
-              'Edit'
-            ) : (
-              'Save'
-            )}
-          </button>
+          {action !== 'view' && (
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? (
+                <><i className="fas fa-spinner fa-spin"></i> Đang lưu...</>
+              ) : (
+                'Lưu'
+              )}
+            </button>
+          )}
           <button 
             type="button" 
             className="btn btn-secondary ml-2" 
             onClick={() => navigate(-1)} 
             disabled={loading}
           >
-            Cancel
+            Hủy
           </button>
         </div>
       </form>

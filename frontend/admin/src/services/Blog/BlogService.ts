@@ -2,13 +2,14 @@ import { API_CONFIG } from '@app/api/config';
 import axios from 'axios';
 import { PaginatedResponse } from '../BaseApi';
 import { get } from 'http';
+import { BlogCategories } from './BlogCategoryService';
 
 export interface BlogPost {
   id: number;
   title: string;
   content: string;
   category_id: number;
-  category_name: string;
+  category: BlogCategories;
   status: 'published' | 'draft';
   is_featured: boolean;
   thumbnail?: string;
@@ -18,40 +19,33 @@ export interface BlogPost {
 }
 
 const BlogService = {
-  getAll: async (page: number = 1): Promise<PaginatedResponse<BlogPost>> => {
-    const response = await axios.get(`${API_CONFIG.BASE_URL}/api/v1/blogs?page=${page}`);
+  getAll: async (params: any): Promise<PaginatedResponse<BlogPost>> => {
+    const queryParams = new URLSearchParams(params).toString();
+    const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs?${queryParams}`);
+    return response.data?.data;
+  },
+
+  create: async (data: any): Promise<BlogPost> => {
+    const response = await axios.post(`${API_CONFIG.BASE_URL}/v1/blogs`, data);
     return response.data;
   },
 
-  create: async (data: FormData): Promise<BlogPost> => {
-    const response = await axios.post(`${API_CONFIG.BASE_URL}/api/v1/blogs`, data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  update: async (id: number, data: FormData): Promise<BlogPost> => {
-    const response = await axios.post(`${API_CONFIG.BASE_URL}/api/v1/blogs/${id}`, data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  update: async (id: number, data: any): Promise<BlogPost> => {
+    const response = await axios.put(`${API_CONFIG.BASE_URL}/v1/blogs/${id}`, data);
     return response.data;
   },
 
   delete: async (id: number): Promise<void> => {
-    await axios.delete(`${API_CONFIG.BASE_URL}/api/v1/blogs/${id}`);
+    await axios.delete(`${API_CONFIG.BASE_URL}/v1/blogs/${id}`);
   },
 
   getById: async (id: number): Promise<BlogPost> => {
-    const response = await axios.get(`${API_CONFIG.BASE_URL}/api/v1/blogs/${id}`);
-    return response.data;
+    const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs/${id}`);
+    return response.data?.data;
   },
   getBySlug: async (slug: string): Promise<BlogPost> => {
-    const response = await axios.get(`${API_CONFIG.BASE_URL}/api/v1/blogs/slug/${slug}`);
-    return response.data;
+    const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs/slug/${slug}`);
+    return response.data?.data;
   },
 };
 

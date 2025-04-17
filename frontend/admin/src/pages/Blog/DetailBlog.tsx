@@ -142,7 +142,44 @@ const DetailBlog = () => {
                     [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                     ['link', 'image'],
                     ['clean']
-                  ]
+                  ],
+                  imageUpload: {
+                    url: `${import.meta.env.VITE_API_URL}/api/v1/blogs/upload-image`,
+                    method: 'POST',
+                    name: 'image',
+                    withCredentials: true,
+                    headers: {
+                      'Accept': 'application/json',
+                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    customUploader: (file: File) => {
+                      return new Promise((resolve, reject) => {
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        
+                        fetch(`${import.meta.env.VITE_API_URL}/api/v1/blogs/upload-image`, {
+                          method: 'POST',
+                          headers: {
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                          },
+                          body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                          if (result.url) {
+                            resolve(result.url);
+                          } else {
+                            reject('Upload failed');
+                          }
+                        })
+                        .catch(error => {
+                          console.error('Error:', error);
+                          reject(error);
+                        });
+                      });
+                    }
+                  }
                 }}
               />
             </div>

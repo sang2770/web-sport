@@ -14,11 +14,39 @@ use Exception;
 class BlogController extends Controller
 {
     protected $blogService;
+    protected $mediaService;
 
     // Constructor để khởi tạo service
-    public function __construct(BlogService $blogService)
+    public function __construct(BlogService $blogService, \App\Services\Media\MediaService $mediaService)
     {
         $this->blogService = $blogService;
+        $this->mediaService = $mediaService;
+    }
+
+    // Upload ảnh cho Quill editor
+    public function uploadImage(Request $request): JsonResponse
+    {
+        try {
+            if (!$request->hasFile('image')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy file ảnh'
+                ], 400);
+            }
+
+            $image = $request->file('image');
+            $result = $this->mediaService->processImage($image, 'blog');
+
+            return response()->json([
+                'success' => true,
+                'url' => $result['url']
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi tải ảnh lên: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // Lấy danh sách tất cả bài viết blog

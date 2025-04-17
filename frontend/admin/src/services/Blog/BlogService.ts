@@ -20,6 +20,11 @@ export interface BlogPost {
 
 const BlogService = {
   getAll: async (params: any): Promise<PaginatedResponse<BlogPost>> => {
+    for (const key in params) {
+      if (!params[key]) {
+        delete params[key];
+      }
+    }
     const queryParams = new URLSearchParams(params).toString();
     const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs?${queryParams}`);
     return response.data?.data;

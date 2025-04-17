@@ -117,4 +117,22 @@ class BlogController extends Controller
             ], $statusCode);
         }
     }
+
+    // Get blog by slug
+    public function getSlug($slug): JsonResponse
+    {
+        try {
+            $blog = $this->blogService->findBySlug($slug);
+            return response()->json([
+                'success' => true,
+                'data' => $blog
+            ]);
+        } catch (Exception $e) {
+            $statusCode = str_contains($e->getMessage(), 'không tồn tại') ? 404 : 500;
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi lấy thông tin bài viết blog: ' . $e->getMessage()
+            ], $statusCode);
+        }
+    }
 }

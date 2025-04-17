@@ -4,6 +4,7 @@ import BlogService from '../services/BlogService';
 
 const Blog = () => {
     const [searchTerm, setSearchTerm] = useState("");
+    const [categoryId, setCategoryId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState([]);
@@ -23,11 +24,8 @@ const Blog = () => {
     const fetchFeaturedPosts = async () => {
         try {
             setLoading(true);
-            const response = await BlogService.getAll(1, { is_featured: true });
+            const response = await BlogService.search({ is_featured: true, page: 1 });
             setFeaturedPosts(response.data);
-            if (response.data.length > 0) {
-                setFeaturedPost(response.data[0]);
-            }
         } catch (error) {
             console.error('Error fetching featured posts:', error);
         } finally {
@@ -38,8 +36,9 @@ const Blog = () => {
     const fetchPosts = async () => {
         try {
             setLoading(true);
-            const response = await BlogService.getAll(currentPage, { is_featured: false });
+            const response = await BlogService.search({ page: currentPage ?? 1 });
             setPosts(response.data);
+
             setPagination({
                 current_page: response.current_page,
                 last_page: response.last_page,
@@ -67,13 +66,13 @@ const Blog = () => {
     };
 
     const handleSearch = async () => {
-        if (!searchTerm.trim()) {
-            fetchPosts();
-            return;
-        }
         try {
             setLoading(true);
-            const response = await BlogService.searchByTerm(searchTerm);
+            const response = await BlogService.search({
+                keyword: searchTerm,
+                category_id: categoryId,
+                page: currentPage
+            });
             setPosts(response.data);
             setPagination({
                 current_page: response.current_page,
@@ -91,20 +90,24 @@ const Blog = () => {
         <div className="bg-gray-100 text-gray-900 min-h-screen p-4">
             {/* Bài viết nổi bật */}
             {featuredPosts && featuredPosts.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto mb-6">
-                    {featuredPosts.map((post, index) => (
-                        <section key={index} className="bg-white shadow-md rounded-lg overflow-hidden">
-                            <img src={post.thumbnail} alt={post.title} className="w-full h-64 object-cover" />
+                <div className="bg-white  rounded-lg max-w-6xl mx-auto mb-6 p-6">
+                    <h2 className="text-xl font-semibold mb-4">Bài viết nổi bật </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {featuredPosts.map((post) => (
+                        <section key={post.id} className="shadow-md rounded-lg overflow-hidden">
+                            <img src={post.thumbnail ?? "https://cdn4.wpbeginner.com/wp-content/uploads/2020/02/how-to-code-a-website.png"} alt={post.title} className="w-full h-64 object-cover" />
                             <div className="p-6">
                                 <h2 className="text-2xl font-bold">{post.title}</h2>
                                 <p className="text-gray-700 mt-2">{post.description}</p>
                             </div>
                         </section>
                     ))}
+                    </div>
+                    
                 </div>
             )}
 
-            <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
+            <main className="max-w-6xl p-6 rounded-lg mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 bg-white">
                 {/* Tất cả bài viết */}
                 <section className="md:col-span-3">
                     <h2 className="text-xl font-semibold mb-4">Tất cả bài viết</h2>
@@ -114,10 +117,10 @@ const Blog = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {posts.map((post) => (
-                                <Link to={`/blog/${post.id}`}>
-                                    <div key={index} className="bg-white shadow-md rounded-lg overflow-hidden">
-                                        <img src={post.thumbnail} alt={post.title} className="w-full h-48 object-cover" />
+                            {posts.map((post, index) => (
+                                <Link key={post.id} to={`/blog/${post.id}`}>
+                                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                                        <img src={post.thumbnail ?? "https://cdn4.wpbeginner.com/wp-content/uploads/2020/02/how-to-code-a-website.png"} alt={post.title} className="w-full h-48 object-cover" />
                                         <div className="p-4">
                                             <h3 className="text-lg font-bold">{post.title}</h3>
                                             <p className="text-gray-700 mt-2">{post.description}</p>
@@ -158,7 +161,7 @@ const Blog = () => {
                 </section>
 
                 {/* Danh mục bài viết */}
-                <aside className="bg-white shadow-md rounded-lg p-4 md:col-span-1">
+                <aside className="p-4 md:col-span-1 border-l border-gray-200">
                     <h2 className="text-xl font-semibold mb-4">Danh mục</h2>
                     <div className="flex mb-4">
                         <input
@@ -167,10 +170,12 @@ const Blog = () => {
                             className="w-full p-2 border border-gray-300 rounded-l-md"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                         />
                         <button
-                            onClick={handleSearch}
+                            onClick={() => {
+                                setCurrentPage(1);
+                                handleSearch();
+                            }}
                             className="px-4 bg-blue-500 text-white rounded-r-md hover:bg-blue-600"
                         >
                             Tìm
@@ -180,22 +185,10 @@ const Blog = () => {
                         {categories.map((category) => (
                             <li key={category.id} className="mb-2">
                                 <button
-                                    onClick={async () => {
+                                    onClick={() => {
+                                        setCategoryId(category.id);
                                         setCurrentPage(1);
-                                        setLoading(true);
-                                        try {
-                                            const response = await BlogService.searchByCategory(category.id);
-                                            setPosts(response.data);
-                                            setPagination({
-                                                current_page: response.current_page,
-                                                last_page: response.last_page,
-                                                total: response.total
-                                            });
-                                        } catch (error) {
-                                            console.error('Error filtering by category:', error);
-                                        } finally {
-                                            setLoading(false);
-                                        }
+                                        handleSearch();
                                     }}
                                     className="text-blue-500 font-medium hover:text-blue-700"
                                 >

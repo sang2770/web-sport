@@ -3,29 +3,29 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8000/api/v1';
 
 const BlogService = {
-  getAll: async (page = 1) => {
-    const response = await axios.get(`${API_URL}/blogs?page=${page}`);
-    return response.data;
+  search: async (params) => {    
+    for (const key in params) {
+      if (!params[key]) {
+        delete params[key];
+      }
+    }
+    const response = await axios.get(`${API_URL}/blogs?${(new URLSearchParams(params)).toString()}`);
+    return response.data?.data;
   },
 
   getById: async (id) => {
     const response = await axios.get(`${API_URL}/blogs/${id}`);
-    return response.data;
+    return response.data?.data;
   },
 
   getCategories: async () => {
     const response = await axios.get(`${API_URL}/blog-categories`);
-    return response.data;
+    return response.data?.data;
   },
-
-  searchByCategory: async (categoryId, page = 1) => {
-    const response = await axios.get(`${API_URL}/blogs?category_id=${categoryId}&page=${page}`);
-    return response.data;
-  },
-
-  searchByTerm: async (term, page = 1) => {
-    const response = await axios.get(`${API_URL}/blogs?search=${term}&page=${page}`);
-    return response.data;
+  
+  getBySlug: async (slug) => {
+    const response = await axios.get(`${API_URL}/blogs/slug/${slug}`);
+    return response.data?.data; 
   }
 };
 

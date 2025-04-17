@@ -30,7 +30,8 @@ Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/review', ReviewController::class);// chưa sửa hả Ngân
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
-    Route::apiResource('/blogs/slug/{id}', [BlogController::class, 'getSlug']);
+    Route::get('/blogs/slug/{id}', [BlogController::class, 'getSlug']);
+    Route::post('/blogs/upload-image', [BlogController::class, 'uploadImage']);
 
     
 

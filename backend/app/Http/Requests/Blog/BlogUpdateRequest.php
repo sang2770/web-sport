@@ -32,7 +32,8 @@ class BlogUpdateRequest extends FormRequest
             'category_id' => 'required|exists:blog_categories,id',
             'slug' => 'nullable|string|max:255',
             'publish_date' => 'nullable|date',
-            'is_featured' => 'nullable|boolean'
+            'is_featured' => 'nullable|boolean',
+            'thumbnail' => 'nullable',
         ];
         return $rules;
     }

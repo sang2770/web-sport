@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             RoleAndPermissionSeeder::class,
             CouponSeeder::class,
+            BlogCategorySeeder::class,
         ]);
     }
 }

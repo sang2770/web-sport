@@ -90,9 +90,9 @@ const Blog = () => {
         <div className="bg-gray-100 text-gray-900 min-h-screen p-4">
             {/* Bài viết nổi bật */}
             {featuredPosts && featuredPosts.length > 0 && (
-                <div className="bg-white  rounded-lg max-w-6xl mx-auto mb-6 p-6">
+                <div className="bg-white  rounded-lg container mx-auto mb-6 p-6">
                     <h2 className="text-xl font-semibold mb-4">Bài viết nổi bật </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {featuredPosts.map((post) => (
                         <section key={post.id} className="shadow-md rounded-lg overflow-hidden">
                             <img src={post.thumbnail ?? "https://cdn4.wpbeginner.com/wp-content/uploads/2020/02/how-to-code-a-website.png"} alt={post.title} className="w-full h-64 object-cover" />
@@ -107,7 +107,7 @@ const Blog = () => {
                 </div>
             )}
 
-            <main className="max-w-6xl p-6 rounded-lg mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 bg-white">
+            <main className="container p-6 rounded-lg mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 bg-white">
                 {/* Tất cả bài viết */}
                 <section className="md:col-span-3">
                     <h2 className="text-xl font-semibold mb-4">Tất cả bài viết</h2>
@@ -116,10 +116,10 @@ const Blog = () => {
                             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             {posts.map((post, index) => (
                                 <Link key={post.id} to={`/blog/${post.id}`}>
-                                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                                    <div className="bg-white shadow-md rounded-lg overflow-hidden" style={{height: "100%"}}>
                                         <img src={post.thumbnail ?? "https://cdn4.wpbeginner.com/wp-content/uploads/2020/02/how-to-code-a-website.png"} alt={post.title} className="w-full h-48 object-cover" />
                                         <div className="p-4">
                                             <h3 className="text-lg font-bold">{post.title}</h3>

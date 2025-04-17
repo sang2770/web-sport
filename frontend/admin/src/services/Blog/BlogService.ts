@@ -52,6 +52,16 @@ const BlogService = {
     const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs/slug/${slug}`);
     return response.data?.data;
   },
+
+  uploadImage: async (file: File): Promise<string> => {
+    const body = new FormData();
+    body.append('image', file);
+    return (await axios.post(`${API_CONFIG.BASE_URL}/v1/blogs/upload-image`, body, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })).data?.url;
+  }
 };
 
 export default BlogService;

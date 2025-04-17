@@ -103,7 +103,7 @@ const Blog = () => {
             </div>
           )}
           
-          <table className="table table-hover text-nowrap">
+          <table className="table table-hover text-nowrap ">
             <thead>
               <tr>
                 <th>ID</th>
@@ -125,7 +125,7 @@ const Blog = () => {
                       <img
                         src={post.thumbnail}
                         alt={post.title}
-                        style={{ width: '50px', height: '50px' }}
+                        style={{ width: '50px', height: '50px', 'border-radius': '5px', 'object-fit': 'cover', 'overflow': 'hidden' }}
                       />
                     </td>
                     <td>{post.title}</td>

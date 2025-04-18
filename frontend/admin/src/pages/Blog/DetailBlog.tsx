@@ -52,9 +52,14 @@ const DetailBlog = () => {
       try {
         setLoading(true);
         const blogData = await BlogService.getById(Number(id));
-        console.log(blogData);
-        
-        setFormData(blogData);
+        setFormData({
+          title: blogData.title,
+          content: blogData.content,
+          category_id: blogData.category_id,
+          thumbnail: blogData.thumbnail,
+          publish_date: blogData.publish_date,
+          is_featured: blogData.is_featured,
+        } as BlogPost);
       } catch (error) {
         console.error("Lỗi khi tải bài viết:", error);
         toast.error("Không thể tải bài viết");
@@ -63,7 +68,7 @@ const DetailBlog = () => {
         setLoading(false);
       }
     };
-
+    
     fetchBlogData();
   }, [id, action]);
 
@@ -90,7 +95,6 @@ const DetailBlog = () => {
         title: formData.title,
         content: formData.content,
         category_id: formData.category_id?.toString() ?? "1",
-        status: formData.status,
         thumbnail: formData.thumbnail?.toString() || "",
         publish_date: formData.publish_date || "",
         is_featured: formData.is_featured ? "1" : "0",
@@ -173,6 +177,7 @@ const DetailBlog = () => {
           <div className="col col-lg-8 col-md-12 pb-3">
             <div className="form-group">
               <label htmlFor="title">Tiêu đề</label>
+              {formData.title}
               <input
                 type="text"
                 className="form-control"
@@ -194,7 +199,12 @@ const DetailBlog = () => {
                 placeholder="Nhập nội dung bài viết"
                 style={{ height: "500px", marginBottom: "20px" }}
                 value={formData.content || ""}
-                onChange={(content) => setFormData({...formData, content })}
+                onChange={(content) => {
+                  setFormData((prevState) => ({
+                    ...prevState,
+                    content: content
+                  }));
+                }}
                 readOnly={action === "view"}
                 modules={{
                   toolbar: {
@@ -238,62 +248,6 @@ const DetailBlog = () => {
                   "code-block",
                 ]}
               />
-
-              {/* <ReactQuill
-                theme="snow"
-                placeholder="Nhập nội dung bài viết"
-                style={{ height: "500px", marginBottom: "20px" }}
-                value={formData.content || ""}
-                ref={quillRef}
-                onChange={(content) => setFormData({ ...formData, content })}
-                readOnly={action === "view"}
-                modules={{
-                  toolbar: {
-                    container: [
-                      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-                      ["bold", "italic", "underline", "strike"],
-                      [{ list: "ordered" }, { list: "bullet" }],
-                      ["link", "image"],
-                      ["clean"],
-                    ],
-                    clipboard: {
-                      matchVisual: false,
-                    },
-                    handlers: {
-                      image: async () => {
-                        const input = document.createElement("input");
-                        input.setAttribute("type", "file");
-                        input.setAttribute("accept", "image/*");
-                        input.click();
-                        input.onchange = async () => {
-                          const file = input.files?.[0];
-                          if (file) {
-                            BlogService.uploadImage(file)
-                              .then((response) => {
-                                if (response && quillRef.current) {
-                                  const range = quillRef.current
-                                    .getEditor()
-                                    .getSelection();
-                                  quillRef.current
-                                    .getEditor()
-                                    .insertEmbed(
-                                      range.index,
-                                      "image",
-                                      response
-                                    );
-                                }
-                              })
-                              .catch((error) => {
-                                console.error("Lỗi khi tải ảnh:", error);
-                                toast.error("Không thể tải ảnh");
-                              });
-                          }
-                        };
-                      },
-                    },
-                  },
-                }}
-              /> */}
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services\Blog;
-
+use Illuminate\Support\Facades\Log;
 use App\Models\Blog;
 use App\Services\BaseService;
 use Illuminate\Support\Str;
@@ -57,7 +57,9 @@ class BlogService extends BaseService
                 $query->where('publish_date', '>=', $request->input('start_date'));
             }
             if ($request->filled('end_date')) {
-                $query->where('publish_date', '<=', $request->input('end_date'));
+                $timestamp = strtotime(str_replace('GMT+0700 (Indochina Time)', '+0700', $request->input('end_date')));
+                $end_date = date('Y-m-d 23:59:59', $timestamp);
+                $query->where('publish_date', '<=', $end_date);
             }
 
             // Apply sorting
